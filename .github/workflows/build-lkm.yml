@@ -32,3 +32,4 @@ jobs:
       ddk_release: '20260313'
       expected_pr_build_size: ${{ inputs.expected_pr_build_size || '' }}
       expected_pr_build_hash: ${{ inputs.expected_pr_build_hash || '' }}
+# fork: custom LKM build (apk_sign skip + KSU_MANAGER_PACKAGE)
