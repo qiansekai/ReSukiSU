@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.androidx.baselineprofile)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.lsplugin.apksign)
     alias(libs.plugins.aboutLibraries)
     id("kotlin-parcelize")
 }
@@ -19,13 +18,6 @@ val androidSourceCompatibility: JavaVersion by rootProject.extra
 val androidTargetCompatibility: JavaVersion by rootProject.extra
 val managerVersionCode: Int by rootProject.extra
 val managerVersionName: String by rootProject.extra
-
-apksign {
-    storeFileProperty = "KEYSTORE_FILE"
-    storePasswordProperty = "KEYSTORE_PASSWORD"
-    keyAliasProperty = "KEY_ALIAS"
-    keyPasswordProperty = "KEY_PASSWORD"
-}
 
 val baseCFlags = listOf(
     "-Wall", "-Qunused-arguments", "-fvisibility=hidden", "-fvisibility-inlines-hidden",
@@ -49,6 +41,7 @@ android {
             }
         }
         release {
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             vcsInfo.include = false
@@ -123,6 +116,7 @@ android {
         targetSdk = androidTargetSdkVersion
         versionCode = managerVersionCode
         versionName = managerVersionName
+        applicationId = "isekai.joucho"
 
         val isPrBuild = project.findProperty("IS_PR_BUILD")?.toString()?.toBoolean() ?: false
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
@@ -136,13 +130,13 @@ android {
         }
 
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64", "armeabi-v7a")
+            abiFilters += listOf("arm64-v8a")
         }
     }
 
     splits {
         abi {
-            isEnable = isReleaseTask
+            isEnable = false
             reset()
             include("arm64-v8a", "x86_64", "armeabi-v7a")
             isUniversalApk = true
@@ -223,9 +217,11 @@ dependencies {
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
 
-    implementation(libs.com.github.topjohnwu.libsu.core)
-    implementation(libs.com.github.topjohnwu.libsu.service)
-    implementation(libs.com.github.topjohnwu.libsu.io)
+    // libsu vendored under app/libs (avoid JitPack on every build)
+    implementation(files("libs/libsu-core-6.0.0.aar"))
+    implementation(files("libs/libsu-service-6.0.0.aar"))
+    implementation(files("libs/libsu-io-6.0.0.aar"))
+    implementation(files("libs/libsu-nio-6.0.0.aar"))
 
     implementation(libs.material.kolor)
     implementation(libs.monet.compat)
@@ -246,8 +242,6 @@ dependencies {
     implementation(libs.androidx.webkit)
 
     implementation(libs.lsposed.cxx)
-
-    implementation(libs.com.github.topjohnwu.libsu.core)
 
     implementation(libs.accompanist.drawablepainter)
 

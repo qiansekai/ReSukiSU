@@ -524,7 +524,11 @@ data class SuSFSConfig(
                 avc_log_spoofing = false,
                 logging = false,
                 hide_sus_mnts_for_non_su_procs = false,
-                uname = UnameConfig(version = "default", release = "default"),
+                // MIUI stock uname defaults for alioth (Redmi K40)
+                uname = UnameConfig(
+                    version = "#1 SMP PREEMPT Wed Jun 7 08:25:17 UTC 2023",
+                    release = "4.19.157-perf-gf8cdf943b2b3",
+                ),
                 sus_path = emptySet(),
                 sus_kstat = emptySet(),
                 open_redirect = emptySet(),

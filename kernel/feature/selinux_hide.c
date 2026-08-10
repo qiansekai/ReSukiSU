@@ -46,7 +46,7 @@
 #endif
 
 static DEFINE_MUTEX(selinux_hide_mutex);
-__maybe_static bool ksu_selinux_hide_enabled __read_mostly = false;
+__maybe_static bool ksu_selinux_hide_enabled __read_mostly = true;
 // remove static in susfs
 __maybe_static bool ksu_selinux_hide_running __read_mostly = false;
 

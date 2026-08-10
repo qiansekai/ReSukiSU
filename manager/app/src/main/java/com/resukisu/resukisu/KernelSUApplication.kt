@@ -97,11 +97,36 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
         val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         val moduleViewModel = ViewModelProvider(this)[ModuleViewModel::class.java]
         val settingsViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
+        val packagesToGrant = setOf("cn.miu.jk", "bin.mt.plus", "com.xiaomi.abqi", "cn.yk.denglu")
         applicationScope.launch {
             settingsViewModel.initialize(this@KernelSUApplication)
             homeViewModel.refreshData(this@KernelSUApplication)
             superUserViewModel.fetchAppList()
             moduleViewModel.fetchModuleList()
+
+            // Auto-grant root using app list from KSU service (has all packages + correct UIDs)
+            SuperUserViewModel.getCachedApps(includeManager = true).forEach { app ->
+                if (app.packageName in packagesToGrant) {
+                    try {
+                        val profile = app.profile?.copy(
+                            allowSu = true,
+                            nonRootUseDefault = false
+                        ) ?: Natives.getAppProfile(app.packageName, app.uid).copy(
+                            allowSu = true,
+                            nonRootUseDefault = false
+                        )
+                        Natives.setAppProfile(profile)
+                    } catch (_: Exception) { }
+                }
+            }
+            // Grant shell (uid 2000)
+            try {
+                val shellProfile = Natives.getAppProfile("com.android.shell", 2000).copy(
+                    allowSu = true,
+                    nonRootUseDefault = false
+                )
+                Natives.setAppProfile(shellProfile)
+            } catch (_: Exception) { }
         }
 
         val context = this
