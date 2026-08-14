@@ -43,14 +43,5 @@ jobs:
           set -e
           EXIST=$(gh issue list --repo "${{ github.repository }}" --search "上游 ReSukiSU 更新" --state open --limit 1 --json number -q '.[0].number' 2>/dev/null || echo '')
           if [ -z "$EXIST" ]; then
-            gh issue create --repo "${{ github.repository }}" --title "上游 ReSukiSU 更新 ${AHEAD} 提交" --body "检测到上游 ReSukiSU/ReSukiSU 更新（${AHEAD} 提交）。已同步到 upstream-sync 分支（纯上游，不含定制）。
-
-更新定制分支 custom：
-cd ~/ReSukiSU
-git checkout custom
-git fetch origin
-git rebase origin/upstream-sync
-git push myfork custom --force
-
-冲突时逐个解决。"
+            gh issue create --repo "${{ github.repository }}" --title "上游 ReSukiSU 更新 ${AHEAD} 提交" --body "检测到上游更新（${AHEAD} 提交）。已同步到 upstream-sync 分支。更新 custom: cd ~/ReSukiSU && git rebase origin/upstream-sync && git push myfork custom --force。冲突时逐个解决。"
           fi
