@@ -1,0 +1,56 @@
+name: Sync Upstream (ReSukiSU)
+
+on:
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Sync upstream to tracking branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          git remote add upstream https://github.com/ReSukiSU/ReSukiSU.git
+          git fetch upstream main --unshallow || git fetch upstream main
+          git fetch origin
+          if git rev-parse origin/upstream-sync >/dev/null 2>&1; then
+            AHEAD=$(git rev-list --count origin/upstream-sync..upstream/main 2>/dev/null || echo 0)
+          else
+            AHEAD=1
+          fi
+          echo "AHEAD=$AHEAD" >> "$GITHUB_ENV"
+          echo "upstream ahead by $AHEAD commits"
+          git push origin upstream/main:refs/heads/upstream-sync --force
+
+      - name: Notify upstream update
+        if: env.AHEAD != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          EXIST=$(gh issue list --repo "${{ github.repository }}" --search "上游 ReSukiSU 更新" --state open --limit 1 --json number -q '.[0].number' 2>/dev/null || echo '')
+          if [ -z "$EXIST" ]; then
+            gh issue create --repo "${{ github.repository }}" --title "上游 ReSukiSU 更新 ${AHEAD} 提交" --body "检测到上游 ReSukiSU/ReSukiSU 更新（${AHEAD} 提交）。已同步到 upstream-sync 分支（纯上游，不含定制）。
+
+更新定制分支 custom：
+cd ~/ReSukiSU
+git checkout custom
+git fetch origin
+git rebase origin/upstream-sync
+git push myfork custom --force
+
+冲突时逐个解决。"
+          fi
