@@ -218,12 +218,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - manager_type: "spoofed"
-            build_type: "release"
           - manager_type: "normal"
             build_type: "release"
-          - manager_type: "normal"
-            build_type: "debug"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
