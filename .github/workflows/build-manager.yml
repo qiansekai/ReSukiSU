@@ -366,13 +366,6 @@ jobs:
             echo "topicid=${{ vars.MESSAGE_DEVELOPING_MANAGER_THREAD_ID }}" >> $GITHUB_OUTPUT
           fi
         
-      - name: Download Debug artifact
-        if: ${{ matrix.manager_type != 'spoofed' }}
-        uses: actions/download-artifact@v8
-        with:
-          name: ${{ steps.determine.outputs.title }}-debug
-          path: ./apk/debug
-
       - name: Download Release artifact
         uses: actions/download-artifact@v8
         with:
