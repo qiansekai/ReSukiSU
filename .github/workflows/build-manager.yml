@@ -183,6 +183,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
+      - name: Remove CN mirrors for cloud direct repos
+        run: |
+          sed -i '/maven.aliyun.com\|mirrors.cloud.tencent.com/d' settings.gradle.kts
+
       - name: Build APK
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
