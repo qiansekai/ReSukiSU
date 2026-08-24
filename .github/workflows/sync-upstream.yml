@@ -19,8 +19,6 @@ jobs:
           fetch-depth: 0
 
       - name: Sync upstream to tracking branch
-        env:
-          SYNC_PAT: ${{ secrets.SYNC_PAT }}
         run: |
           set -e
           git remote add upstream https://github.com/ReSukiSU/ReSukiSU.git
@@ -33,7 +31,6 @@ jobs:
           fi
           echo "AHEAD=$AHEAD" >> "$GITHUB_ENV"
           echo "upstream ahead by $AHEAD commits"
-          git remote set-url origin "https://x-access-token:${SYNC_PAT}@github.com/${{ github.repository }}.git"
           git push origin upstream/main:refs/heads/upstream-sync --force
 
       - name: Notify upstream update
