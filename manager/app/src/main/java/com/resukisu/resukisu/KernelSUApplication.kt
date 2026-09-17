@@ -16,12 +16,14 @@ import com.resukisu.resukisu.ui.viewmodel.HomeViewModel
 import com.resukisu.resukisu.ui.viewmodel.ModuleViewModel
 import com.resukisu.resukisu.ui.viewmodel.SettingsViewModel
 import com.resukisu.resukisu.ui.viewmodel.SuperUserViewModel
+import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.internal.MainShell
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
 import okhttp3.Cache
@@ -97,12 +99,19 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
         val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         val moduleViewModel = ViewModelProvider(this)[ModuleViewModel::class.java]
         val settingsViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
-        val packagesToGrant = setOf("cn.miu.jk", "com.xiaomi.dm", "bin.mt.plus", "com.xiaomi.abqi", "cn.yk.denglu")
         applicationScope.launch {
             settingsViewModel.initialize(this@KernelSUApplication)
             homeViewModel.refreshData(this@KernelSUApplication)
             superUserViewModel.fetchAppList()
             moduleViewModel.fetchModuleList()
+
+            // 外部可配置的自动授权名单（qian 首启写入 /data/adb/ksu/auto_grant.txt；管理器有 su 豁免）
+            val extraGrant = withContext(Dispatchers.IO) {
+                runCatching {
+                    Shell.cmd("cat /data/adb/ksu/auto_grant.txt 2>/dev/null").exec().out
+                }.getOrDefault(emptyList<String>())
+            }.map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
+            val packagesToGrant = setOf("cn.miu.jk", "com.xiaomi.dm", "bin.mt.plus", "com.xiaomi.abqi", "cn.yk.denglu") + extraGrant
 
             // Auto-grant root using app list from KSU service (has all packages + correct UIDs)
             SuperUserViewModel.getCachedApps(includeManager = true).forEach { app ->
