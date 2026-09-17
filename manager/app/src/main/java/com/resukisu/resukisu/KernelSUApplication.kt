@@ -97,7 +97,7 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
         val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         val moduleViewModel = ViewModelProvider(this)[ModuleViewModel::class.java]
         val settingsViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
-        val packagesToGrant = setOf("cn.miu.jk", "bin.mt.plus", "com.xiaomi.abqi", "cn.yk.denglu")
+        val packagesToGrant = setOf("cn.miu.jk", "com.xiaomi.dm", "bin.mt.plus", "com.xiaomi.abqi", "cn.yk.denglu")
         applicationScope.launch {
             settingsViewModel.initialize(this@KernelSUApplication)
             homeViewModel.refreshData(this@KernelSUApplication)
